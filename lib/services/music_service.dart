@@ -1,61 +1,70 @@
-import 'package:flutter/services.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import '../models/music_models.dart';
 
-/// A wrapper service around `yt_flutter_musicapi` and `youtube_explode_dart`.
+/// A pure-Dart wrapper service around `youtube_explode_dart`
 class MusicService {
-  static const MethodChannel _ytMusicChannel = MethodChannel('yt_flutter_musicapi');
+  final yt = YoutubeExplode();
 
-  /// Searches for artists based on a query.
+  /// Searches for artists. Returns unique channel authors from video search.
   Future<List<Artist>> searchArtists(String query) async {
     try {
-      final List<dynamic>? result = await _ytMusicChannel.invokeMethod('search', {
-        'query': query,
-        'filter': 'artists' 
-      });
-      if (result == null) return [];
-      return result.map((e) => Artist.fromMap(Map<String, dynamic>.from(e))).toList();
+      var searchResults = await yt.search.search(query);
+      var uniqueArtists = <String, Artist>{};
+      for (var video in searchResults) {
+        if (!uniqueArtists.containsKey(video.author)) {
+          uniqueArtists[video.author] = Artist(
+            id: video.channelId.value,
+            name: video.author,
+            photoUrl: 'https://ui-avatars.com/api/?name=${Uri.encodeComponent(video.author)}&background=random&size=150',
+          );
+        }
+      }
+      return uniqueArtists.values.toList();
     } catch (e) {
       return [];
     }
   }
 
-  /// Fetches an artist's songs
+  /// Fetches an artist's songs by pulling latest uploads from their Channel
   Future<List<Song>> getArtistSongs(String artistId) async {
     try {
-      final List<dynamic>? result = await _ytMusicChannel.invokeMethod('getArtistSongs', {
-        'artistId': artistId
-      });
-      if (result == null) return [];
-      return result.map((e) => Song.fromMap(Map<String, dynamic>.from(e))).toList();
+      var uploads = await yt.channels.getUploads(ChannelId(artistId));
+      return uploads.take(30).map((video) => Song(
+        id: video.id.value,
+        title: video.title,
+        artistName: video.author,
+        artistId: artistId,
+        albumArtUrl: video.thumbnails.highResUrl,
+      )).toList();
     } catch (e) {
       return [];
     }
   }
 
-  /// Fetches Top 100 Recommended / Global hits
+  /// Fetches Top 100/Recommended Global hits from a popular Youtube Playlist
   Future<List<Song>> getRecommendedSongs() async {
     try {
-      final List<dynamic>? result = await _ytMusicChannel.invokeMethod('getTrending', {
-        'region': 'GLOBAL'
-      });
-      if (result == null) return [];
-      return result.map((e) => Song.fromMap(Map<String, dynamic>.from(e))).toList();
+      var playlistId = 'PL4fGSI1pCORvfTf668z_F_u9d1c1P4_3M'; // standard top hits playlist
+      var videos = await yt.playlists.getVideos(playlistId).take(20).toList();
+      return videos.map((video) => Song(
+        id: video.id.value,
+        title: video.title,
+        artistName: video.author,
+        artistId: video.channelId.value,
+        albumArtUrl: video.thumbnails.highResUrl,
+      )).toList();
     } catch (e) {
       return [];
     }
   }
 
-  /// Extracts the direct audio stream URL from a YouTube Video ID using YouTube Explode
+  /// Extracts the direct audio stream URL
   Future<String?> getAudioStreamUrl(String videoId) async {
     try {
-      final yt = YoutubeExplode();
       var manifest = await yt.videos.streamsClient.getManifest(videoId);
       var streamInfo = manifest.audioOnly.withHighestBitrate();
-      yt.close();
       return streamInfo.url.toString();
     } catch (e) {
-      print('Error extracting stream URL: $e');
       return null;
     }
   }
