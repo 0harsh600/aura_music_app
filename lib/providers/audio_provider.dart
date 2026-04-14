@@ -12,6 +12,9 @@ class AudioProvider extends ChangeNotifier {
   int _currentIndex = -1;
   bool _isLoading = false;
 
+  String? _cachedNextUrl;
+  int? _cachedNextIndex;
+
   AudioProvider() {
     _player.playerStateStream.listen((state) {
       if (state.processingState == ProcessingState.completed) {
@@ -31,11 +34,11 @@ class AudioProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
 
   /// Loads an entire queue of songs and starts playing from the given index.
-  /// This fulfills the requirement: when you play an artist, only that artist's songs play 
-  /// and they automatically play next.
   Future<void> playArtistQueue(List<Song> songs, int initialIndex) async {
     _queue = songs;
     _currentIndex = initialIndex;
+    _cachedNextUrl = null; 
+    _cachedNextIndex = null;
     notifyListeners();
     await _playCurrent();
   }
@@ -48,30 +51,54 @@ class AudioProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // 1. Get raw URL from YTDLP
-      final url = await _musicService.getAudioStreamUrl(song.id);
-      
-      if (url != null) {
-        // 2. Wrap it in AudioSource with MediaItem for lock screen controls
-        final audioSource = AudioSource.uri(
-          Uri.parse(url),
-          tag: MediaItem(
-            id: song.id,
-            album: song.artistName,
-            title: song.title,
-            artist: song.artistName,
-            artUri: song.albumArtUrl != null ? Uri.parse(song.albumArtUrl!) : null,
-          ),
-        );
-        
-        await _player.setAudioSource(audioSource);
-        _player.play();
+      // 1. Instant Start: Check if we pre-loaded the raw URL of this exact song!
+      final url = (_currentIndex == _cachedNextIndex && _cachedNextUrl != null) 
+          ? _cachedNextUrl 
+          : await _musicService.getAudioStreamUrl(song.id);
+          
+      if (url == null) {
+        // Fallback: Drop song and skip if unplayable streams are hit
+        skipToNext();
+        return;
       }
+
+      // 2. Wrap it in AudioSource with MediaItem for lock screen controls
+      final audioSource = AudioSource.uri(
+        Uri.parse(url),
+        tag: MediaItem(
+          id: song.id,
+          album: song.artistName,
+          title: song.title,
+          artist: song.artistName,
+          artUri: song.albumArtUrl != null ? Uri.parse(song.albumArtUrl!) : null,
+        ),
+      );
+      
+      await _player.setAudioSource(audioSource);
+      _player.play();
+      
+      // 3. BACKGROUND PRE-PULL NEXT: Ensure the next song's URL is loaded silently!
+      _preloadNextSong();
+      
     } catch (e) {
       print('Error playing song: $e');
+      skipToNext(); // Auto-skip on failure
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  Future<void> _preloadNextSong() async {
+    final nextIndex = _currentIndex + 1;
+    if (nextIndex < _queue.length) {
+      final nextSong = _queue[nextIndex];
+      try {
+        _cachedNextUrl = await _musicService.getAudioStreamUrl(nextSong.id);
+        _cachedNextIndex = nextIndex;
+      } catch(e) {
+        _cachedNextUrl = null;
+      }
     }
   }
 

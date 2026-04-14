@@ -72,13 +72,18 @@ class _ArtistScreenState extends State<ArtistScreen> {
                 SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
-                      final song = _songs[index];
+                      // SAFEGUARD: Absolute bounds check to stop RangeError
+                      if (index < 0 || index > _songs.length) return null;
+                      
                       // Add padding at the bottom of the list for the MiniPlayer
-                      if (index == _songs.length) return const SizedBox(height: 100);
+                      if (index == _songs.length) return const SizedBox(height: 120);
+                      
+                      final song = _songs[index];
                       
                       return ListTile(
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                         leading: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(4),
                           child: song.albumArtUrl != null
                               ? CachedNetworkImage(
                                   imageUrl: song.albumArtUrl!,
@@ -95,13 +100,16 @@ class _ArtistScreenState extends State<ArtistScreen> {
                         ),
                         title: Text(
                           song.title,
-                          style: const TextStyle(fontWeight: FontWeight.w500),
+                          style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        subtitle: Text(
-                          song.artistName,
-                          style: const TextStyle(color: Colors.white54, fontSize: 13),
+                        subtitle: Padding(
+                          padding: const EdgeInsets.only(top: 4.0),
+                          child: Text(
+                            song.artistName,
+                            style: const TextStyle(color: Colors.white54, fontSize: 13),
+                          ),
                         ),
                         trailing: const Icon(Icons.more_vert, color: Colors.white54),
                         onTap: () {

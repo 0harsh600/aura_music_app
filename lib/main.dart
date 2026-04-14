@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'providers/audio_provider.dart';
-import 'screens/home_screen.dart';
+import 'screens/main_layout.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,17 +39,17 @@ class MusicApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF0F0F13), // Deep subtle background
-        primaryColor: const Color(0xFF5E5CE6), // Soft indigo
+        scaffoldBackgroundColor: const Color(0xFF121212), // Spotify Deep Dark
+        primaryColor: const Color(0xFF1DB954), // Spotify Green
         colorScheme: const ColorScheme.dark(
-          primary: Color(0xFF5E5CE6),
-          secondary: Color(0xFF32D74B),
-          surface: Color(0xFF1C1C23),
+          primary: Color(0xFF1DB954),
+          secondary: Color(0xFF1DB954),
+          surface: Color(0xFF121212),
         ),
         textTheme: GoogleFonts.outfitTextTheme(ThemeData.dark().textTheme),
         useMaterial3: true,
       ),
-      home: const HomeScreen(),
+      home: const MainLayout(),
     );
   }
 }
