@@ -1,0 +1,31 @@
+name: music_app
+description: A clean and calm Spotify-like music app.
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.2
+  yt_flutter_musicapi: any
+  flutter_ytdlp_plugin: any
+  just_audio: ^0.9.36
+  just_audio_background: ^0.0.1-beta.12
+  audio_session: ^0.1.16
+  provider: ^6.1.1
+  cached_network_image: ^3.3.0
+  google_fonts: ^6.1.0
+  audio_video_progress_bar: ^2.0.3
+  palette_generator: ^0.3.3+3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
