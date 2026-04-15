@@ -7,7 +7,7 @@ import 'dart:convert';
 import '../models/music_models.dart';
 import '../services/music_service.dart';
 
-enum RepeatMode { off, all, one }
+enum LoopMode { off, all, one }
 
 class AudioProvider extends ChangeNotifier {
   final AudioPlayer _player = AudioPlayer();
@@ -18,7 +18,7 @@ class AudioProvider extends ChangeNotifier {
   int _currentIndex = -1;
   bool _isLoading = false;
   bool _shuffleOn = false;
-  RepeatMode _repeatMode = RepeatMode.off;
+  LoopMode _LoopMode = LoopMode.off;
 
   // Pre-cached next URL
   String? _cachedNextUrl;
@@ -50,7 +50,7 @@ class AudioProvider extends ChangeNotifier {
   Song? get currentSong => (_currentIndex >= 0 && _currentIndex < _queue.length) ? _queue[_currentIndex] : null;
   bool get isLoading => _isLoading;
   bool get shuffleOn => _shuffleOn;
-  RepeatMode get repeatMode => _repeatMode;
+  LoopMode get LoopMode => _LoopMode;
   List<Song> get likedSongs => _likedSongs;
 
   bool isSongLiked(String songId) => _likedSongs.any((s) => s.id == songId);
@@ -130,12 +130,12 @@ class AudioProvider extends ChangeNotifier {
   }
 
   void _onSongCompleted() {
-    switch (_repeatMode) {
-      case RepeatMode.one:
+    switch (_LoopMode) {
+      case LoopMode.one:
         _player.seek(Duration.zero);
         _player.play();
         break;
-      case RepeatMode.all:
+      case LoopMode.all:
         if (_currentIndex >= _queue.length - 1) {
           _currentIndex = 0;
           _playCurrent();
@@ -143,7 +143,7 @@ class AudioProvider extends ChangeNotifier {
           skipToNext();
         }
         break;
-      case RepeatMode.off:
+      case LoopMode.off:
         skipToNext();
         break;
     }
@@ -167,7 +167,7 @@ class AudioProvider extends ChangeNotifier {
     if (_currentIndex < _queue.length - 1) {
       _currentIndex++;
       _playCurrent();
-    } else if (_repeatMode == RepeatMode.all) {
+    } else if (_LoopMode == LoopMode.all) {
       _currentIndex = 0;
       _playCurrent();
     }
@@ -228,15 +228,15 @@ class AudioProvider extends ChangeNotifier {
 
   // --- Repeat ---
   void toggleRepeat() {
-    switch (_repeatMode) {
-      case RepeatMode.off:
-        _repeatMode = RepeatMode.all;
+    switch (_LoopMode) {
+      case LoopMode.off:
+        _LoopMode = LoopMode.all;
         break;
-      case RepeatMode.all:
-        _repeatMode = RepeatMode.one;
+      case LoopMode.all:
+        _LoopMode = LoopMode.one;
         break;
-      case RepeatMode.one:
-        _repeatMode = RepeatMode.off;
+      case LoopMode.one:
+        _LoopMode = LoopMode.off;
         break;
     }
     notifyListeners();
