@@ -42,12 +42,20 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Aura-Music-App-APK
-          path: build/app/outputs/flutter-apk/app-debug.apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Delete old releases
+        uses: dev-drprasad/delete-older-releases@v0.3.4
+        with:
+          keep_latest: 0
+          delete_tags: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish to GitHub Releases
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: "v1.0.1"
-          name: "Aura Music v1.0.1"
-          body: "Official Release with pure Dart backend."
-          files: build/app/outputs/flutter-apk/app-debug.apk
+          tag_name: "v2.0.0"
+          name: "Aura Music v2.0.0 - Full Rewrite"
+          body: "Complete rewrite. Instant playback, background audio, shuffle, repeat, liked songs, search history, queue view. Built by Harshvardhan Sing Rathore."
+          files: build/app/outputs/flutter-apk/app-release.apk

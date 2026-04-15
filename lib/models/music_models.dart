@@ -1,9 +1,10 @@
 class Song {
-  final String id; // usually the YouTube Video ID
+  final String id; // YouTube Video ID
   final String title;
   final String artistName;
   final String artistId;
   final String? albumArtUrl;
+  final Duration? duration;
 
   Song({
     required this.id,
@@ -11,6 +12,7 @@ class Song {
     required this.artistName,
     required this.artistId,
     this.albumArtUrl,
+    this.duration,
   });
 
   factory Song.fromMap(Map<String, dynamic> map) {
@@ -22,6 +24,23 @@ class Song {
       albumArtUrl: map['thumbnail'] ?? map['albumArtUrl'],
     );
   }
+
+  // For SharedPreferences serialization
+  Map<String, String> toMap() => {
+    'id': id,
+    'title': title,
+    'artistName': artistName,
+    'artistId': artistId,
+    'albumArtUrl': albumArtUrl ?? '',
+  };
+
+  factory Song.fromStorageMap(Map<String, String> map) => Song(
+    id: map['id'] ?? '',
+    title: map['title'] ?? 'Unknown',
+    artistName: map['artistName'] ?? 'Unknown',
+    artistId: map['artistId'] ?? '',
+    albumArtUrl: map['albumArtUrl']?.isNotEmpty == true ? map['albumArtUrl'] : null,
+  );
 }
 
 class Artist {

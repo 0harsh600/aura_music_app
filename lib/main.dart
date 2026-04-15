@@ -7,16 +7,15 @@ import 'screens/main_layout.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Try to initialize background playing if configuring platforms
+
   try {
     await JustAudioBackground.init(
       androidNotificationChannelId: 'com.music_app.channel.audio',
       androidNotificationChannelName: 'Audio playback',
       androidNotificationOngoing: true,
     );
-  } catch(e) {
-    print('Failed to init background audio: $e');
+  } catch (e) {
+    debugPrint('Background audio init: $e');
   }
 
   runApp(
@@ -24,13 +23,13 @@ Future<void> main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => AudioProvider()),
       ],
-      child: const MusicApp(),
+      child: const AuraApp(),
     ),
   );
 }
 
-class MusicApp extends StatelessWidget {
-  const MusicApp({Key? key}) : super(key: key);
+class AuraApp extends StatelessWidget {
+  const AuraApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -39,12 +38,12 @@ class MusicApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF121212), // Spotify Deep Dark
-        primaryColor: const Color(0xFF1DB954), // Spotify Green
+        scaffoldBackgroundColor: const Color(0xFF121212),
+        primaryColor: const Color(0xFF1DB954),
         colorScheme: const ColorScheme.dark(
           primary: Color(0xFF1DB954),
           secondary: Color(0xFF1DB954),
-          surface: Color(0xFF121212),
+          surface: Color(0xFF181818),
         ),
         textTheme: GoogleFonts.outfitTextTheme(ThemeData.dark().textTheme),
         useMaterial3: true,
