@@ -224,8 +224,8 @@ class _PlayerScreenState extends State<PlayerScreen> {
                           // Repeat
                           IconButton(
                             icon: Icon(
-                              audio.LoopMode == LoopMode.one ? Icons.repeat_one_rounded : Icons.repeat_rounded,
-                              color: audio.LoopMode != LoopMode.off ? const Color(0xFF1DB954) : Colors.white54,
+                              audio.loopMode == LoopMode.one ? Icons.repeat_one_rounded : Icons.repeat_rounded,
+                              color: audio.loopMode != LoopMode.off ? const Color(0xFF1DB954) : Colors.white54,
                               size: 24,
                             ),
                             onPressed: () => audio.toggleRepeat(),

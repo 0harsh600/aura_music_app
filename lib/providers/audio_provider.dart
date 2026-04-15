@@ -18,7 +18,7 @@ class AudioProvider extends ChangeNotifier {
   int _currentIndex = -1;
   bool _isLoading = false;
   bool _shuffleOn = false;
-  LoopMode _LoopMode = LoopMode.off;
+  LoopMode _loopMode = LoopMode.off;
 
   // Pre-cached next URL
   String? _cachedNextUrl;
@@ -50,7 +50,7 @@ class AudioProvider extends ChangeNotifier {
   Song? get currentSong => (_currentIndex >= 0 && _currentIndex < _queue.length) ? _queue[_currentIndex] : null;
   bool get isLoading => _isLoading;
   bool get shuffleOn => _shuffleOn;
-  LoopMode get LoopMode => _LoopMode;
+  LoopMode get loopMode => _loopMode;
   List<Song> get likedSongs => _likedSongs;
 
   bool isSongLiked(String songId) => _likedSongs.any((s) => s.id == songId);
@@ -130,7 +130,7 @@ class AudioProvider extends ChangeNotifier {
   }
 
   void _onSongCompleted() {
-    switch (_LoopMode) {
+    switch (_loopMode) {
       case LoopMode.one:
         _player.seek(Duration.zero);
         _player.play();
@@ -167,7 +167,7 @@ class AudioProvider extends ChangeNotifier {
     if (_currentIndex < _queue.length - 1) {
       _currentIndex++;
       _playCurrent();
-    } else if (_LoopMode == LoopMode.all) {
+    } else if (_loopMode == LoopMode.all) {
       _currentIndex = 0;
       _playCurrent();
     }
@@ -228,15 +228,15 @@ class AudioProvider extends ChangeNotifier {
 
   // --- Repeat ---
   void toggleRepeat() {
-    switch (_LoopMode) {
+    switch (_loopMode) {
       case LoopMode.off:
-        _LoopMode = LoopMode.all;
+        _loopMode = LoopMode.all;
         break;
       case LoopMode.all:
-        _LoopMode = LoopMode.one;
+        _loopMode = LoopMode.one;
         break;
       case LoopMode.one:
-        _LoopMode = LoopMode.off;
+        _loopMode = LoopMode.off;
         break;
     }
     notifyListeners();
