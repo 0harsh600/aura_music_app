@@ -29,13 +29,21 @@ jobs:
           flutter-version: 'any'
           channel: 'stable'
 
-      - name: Generate missing platform folders
-        run: flutter create --project-name music_app .
+      - name: Generate platform scaffold (preserving our files)
+        run: |
+          # Back up our custom AndroidManifest
+          cp android/app/src/main/AndroidManifest.xml /tmp/AndroidManifest.xml.bak
+          
+          # Generate missing platform files
+          flutter create --project-name music_app .
+          
+          # Restore our custom AndroidManifest (with INTERNET permission + audio service)
+          cp /tmp/AndroidManifest.xml.bak android/app/src/main/AndroidManifest.xml
 
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Build APK
+      - name: Build release APK
         run: flutter build apk --release
 
       - name: Upload APK artifact
@@ -55,7 +63,7 @@ jobs:
       - name: Publish to GitHub Releases
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: "v2.0.0"
-          name: "Aura Music v2.0.0 - Full Rewrite"
-          body: "Complete rewrite. Instant playback, background audio, shuffle, repeat, liked songs, search history, queue view. Built by Harshvardhan Sing Rathore."
+          tag_name: "v2.1.0"
+          name: "Aura Music v2.1.0 - Network Fix"
+          body: "FIXED: App can now access the internet. Added INTERNET permission, background audio service. All features working."
           files: build/app/outputs/flutter-apk/app-release.apk
